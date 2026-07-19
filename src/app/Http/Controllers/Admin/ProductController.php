@@ -4,11 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\FileUploadService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ProductController extends Controller
 {
+    public function __construct(
+        protected FileUploadService $uploadService
+    ) {}
+
     public function index()
     {
         $products = Product::latest()->paginate(15);
@@ -22,14 +27,14 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'material' => 'required|string|max:100',
             'category' => 'required|string|max:100',
             'specifications' => 'nullable|array',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'stock' => 'nullable|integer|min:0',
             'min_order' => 'nullable|integer|min:1',
             'unit' => 'nullable|string|max:50',
@@ -37,24 +42,24 @@ class ProductController extends Controller
             'estimation_days' => 'nullable|integer|min:0',
         ]);
 
-        $data = $request->except(['image', 'specifications']);
-        
-        // Filter empty specifications
-        if ($request->has('specifications')) {
-            $specs = array_filter($request->specifications, function($value) {
-                return !empty($value);
-            });
-            $data['specifications'] = !empty($specs) ? $specs : null;
-        }
-        
-        // Handle checkbox
-        $data['is_available'] = $request->has('is_available') ? 1 : 0;
+        $data = $this->productData($validated, $request);
+        $uploadedImage = null;
 
-        if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')->store('products', 'public');
-        }
+        try {
+            if ($request->hasFile('image')) {
+                $uploadedImage = $this->uploadService->uploadPublic(
+                    $request->file('image'),
+                    'products'
+                );
+                $data['image_path'] = $uploadedImage;
+            }
 
-        $product = Product::create($data);
+            $product = Product::create($data);
+        } catch (Throwable $exception) {
+            $this->uploadService->deletePublic($uploadedImage);
+
+            throw $exception;
+        }
 
         return redirect()->route('admin.products.show', $product)
             ->with('success', 'Produk berhasil ditambahkan.');
@@ -72,14 +77,14 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'material' => 'nullable|string|max:100',
-            'category' => 'nullable|string|max:100',
+            'material' => 'required|string|max:100',
+            'category' => 'required|string|max:100',
             'specifications' => 'nullable|array',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'stock' => 'nullable|integer|min:0',
             'min_order' => 'nullable|integer|min:1',
             'unit' => 'nullable|string|max:50',
@@ -87,28 +92,29 @@ class ProductController extends Controller
             'estimation_days' => 'nullable|integer|min:0',
         ]);
 
-        $data = $request->except(['image', 'specifications']);
-        
-        // Filter empty specifications
-        if ($request->has('specifications')) {
-            $specs = array_filter($request->specifications, function($value) {
-                return !empty($value);
-            });
-            $data['specifications'] = !empty($specs) ? $specs : null;
-        }
-        
-        // Handle checkbox
-        $data['is_available'] = $request->has('is_available') ? 1 : 0;
+        $data = $this->productData($validated, $request);
+        $oldImage = $product->getRawOriginal('image_path');
+        $uploadedImage = null;
 
-        if ($request->hasFile('image')) {
-            // Delete old image
-            if ($product->image_path) {
-                Storage::disk('public')->delete($product->image_path);
+        try {
+            if ($request->hasFile('image')) {
+                $uploadedImage = $this->uploadService->uploadPublic(
+                    $request->file('image'),
+                    'products'
+                );
+                $data['image_path'] = $uploadedImage;
             }
-            $data['image_path'] = $request->file('image')->store('products', 'public');
+
+            $product->update($data);
+        } catch (Throwable $exception) {
+            $this->uploadService->deletePublic($uploadedImage);
+
+            throw $exception;
         }
 
-        $product->update($data);
+        if ($uploadedImage !== null && $oldImage !== $uploadedImage) {
+            $this->uploadService->deletePublic($oldImage);
+        }
 
         return redirect()->route('admin.products.show', $product)
             ->with('success', 'Produk berhasil diupdate.');
@@ -116,13 +122,33 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->image_path) {
-            Storage::disk('public')->delete($product->image_path);
-        }
-
+        $imagePath = $product->getRawOriginal('image_path');
         $product->delete();
+        $this->uploadService->deletePublic($imagePath);
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Produk berhasil dihapus.');
+    }
+
+    private function productData(array $validated, Request $request): array
+    {
+        $specifications = array_filter(
+            $validated['specifications'] ?? [],
+            fn (mixed $value): bool => $value !== null && $value !== ''
+        );
+
+        return [
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'price' => $validated['price'],
+            'material' => $validated['material'],
+            'category' => $validated['category'],
+            'specifications' => $specifications !== [] ? $specifications : null,
+            'stock' => $validated['stock'] ?? 0,
+            'min_order' => $validated['min_order'] ?? 1,
+            'unit' => $validated['unit'] ?? null,
+            'estimation_days' => $validated['estimation_days'] ?? null,
+            'is_available' => $request->boolean('is_available'),
+        ];
     }
 }

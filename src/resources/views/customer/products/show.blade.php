@@ -15,7 +15,7 @@
             <!-- Product Image -->
             <div>
                 @if($product->image_path)
-                    <img src="{{ Storage::url($product->image_path) }}" alt="{{ $product->name }}" class="w-full rounded-lg">
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full rounded-lg">
                 @else
                     <div class="w-full h-96 bg-gray-200 rounded-lg flex items-center justify-center">
                         <i class="fas fa-image text-gray-400 text-6xl"></i>

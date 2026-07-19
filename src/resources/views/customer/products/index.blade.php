@@ -54,7 +54,7 @@
                     <div class="flex justify-center pt-6">
                         <div class="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md bg-gray-100 flex items-center justify-center">
                             @if($product->image_path)
-                                <img src="{{ Storage::url($product->image_path) }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
+                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-full h-full object-cover">
                             @else
                                 <i class="fas fa-image text-gray-400 text-3xl"></i>
                             @endif

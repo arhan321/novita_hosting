@@ -152,7 +152,7 @@
                             <h3 class="text-lg font-semibold text-gray-900 mb-3">File Desain</h3>
                             <div class="grid grid-cols-2 gap-3">
                                 @foreach($order->files->where('file_type', 'design') as $file)
-                                    <a href="{{ Storage::url($file->file_path) }}" target="_blank"
+                                    <a href="{{ route('files.order-files.show', $file) }}" target="_blank" rel="noopener noreferrer"
                                        class="flex items-center p-3 bg-gray-50 rounded hover:bg-gray-100">
                                         <i class="fas fa-file text-blue-600 text-xl mr-3"></i>
                                         <span class="text-sm truncate">{{ $file->file_name }}</span>
@@ -194,13 +194,13 @@
                                 @if($order->payment->payment_proof)
                                     <div>
                                         <p class="text-xs text-gray-600 mb-2">Bukti Pembayaran</p>
-                                        <a href="{{ Storage::url($order->payment->payment_proof) }}" target="_blank"
+                                        <a href="{{ route('files.payment-proofs.show', $order->payment) }}" target="_blank" rel="noopener noreferrer"
                                            class="inline-block">
                                             @php
                                                 $ext = pathinfo($order->payment->payment_proof, PATHINFO_EXTENSION);
                                             @endphp
                                             @if(in_array(strtolower($ext), ['jpg', 'jpeg', 'png']))
-                                                <img src="{{ Storage::url($order->payment->payment_proof) }}"
+                                                <img src="{{ route('files.payment-proofs.show', $order->payment) }}"
                                                      alt="Bukti Pembayaran" class="max-w-sm rounded border">
                                             @else
                                                 <span class="text-blue-600 hover:text-blue-800">

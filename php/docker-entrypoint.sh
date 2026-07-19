@@ -30,6 +30,26 @@ if [ -z "${REMOTE_HOST}" ]; then
   . ~/.bashrc
 fi
 
+# Pastikan PHP-FPM dapat menulis upload, session, cache, dan log Laravel.
+APP_DIR="/var/www/html"
+for WRITABLE_DIR in \
+  "$APP_DIR/storage/app/public/products" \
+  "$APP_DIR/storage/app/public/order-files" \
+  "$APP_DIR/storage/app/public/payment-proofs" \
+  "$APP_DIR/storage/framework/cache" \
+  "$APP_DIR/storage/framework/sessions" \
+  "$APP_DIR/storage/framework/views" \
+  "$APP_DIR/storage/logs" \
+  "$APP_DIR/bootstrap/cache"
+do
+  mkdir -p "$WRITABLE_DIR"
+  chown -R www-data:www-data "$WRITABLE_DIR"
+  chmod -R ug+rwX "$WRITABLE_DIR"
+done
+
+# Nginx hanya membaca gambar produk secara langsung.
+chmod -R a+rX "$APP_DIR/storage/app/public/products"
+
 # Start the cron service.
 service cron start
 

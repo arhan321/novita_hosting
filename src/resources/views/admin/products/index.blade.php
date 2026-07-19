@@ -35,7 +35,7 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     @if($product->image_path)
-                                        <img src="{{ Storage::url($product->image_path) }}" alt="{{ $product->name }}" class="w-10 h-10 rounded object-cover mr-3">
+                                        <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-10 h-10 rounded object-cover mr-3">
                                     @else
                                         <div class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center mr-3">
                                             <i class="fas fa-image text-gray-400"></i>

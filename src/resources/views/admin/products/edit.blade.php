@@ -143,7 +143,7 @@
                         </label>
                         @if($product->image_path)
                             <div class="mb-3">
-                                <img src="{{ Storage::url($product->image_path) }}" alt="{{ $product->name }}"
+                                <img src="{{ $product->image_url }}" alt="{{ $product->name }}"
                                     class="max-w-xs rounded border">
                                 <p class="text-xs text-gray-500 mt-1">Gambar saat ini</p>
                             </div>

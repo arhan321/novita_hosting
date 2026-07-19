@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\StoragePath;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,6 +34,23 @@ class Product extends Model
             'is_active' => 'boolean',
             'is_available' => 'boolean',
         ];
+    }
+
+    protected function imagePath(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => StoragePath::normalize($value),
+            set: fn (?string $value) => StoragePath::normalize($value),
+        );
+    }
+
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => StoragePath::publicUrl(
+                $attributes['image_path'] ?? null
+            ),
+        );
     }
 
     // Relationships

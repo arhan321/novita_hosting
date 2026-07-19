@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\Owner\DashboardController as OwnerDashboardController;
 use App\Http\Controllers\Owner\ReportController as OwnerReportController;
 use App\Http\Controllers\Owner\InvoiceController as OwnerInvoiceController;
+use App\Http\Controllers\StoredFileController;
 
 // Public Routes
 Route::get('/', function () {
@@ -33,6 +34,14 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+// File sensitif hanya boleh dibaca melalui Laravel setelah otorisasi.
+Route::middleware('auth')->prefix('files')->name('files.')->group(function () {
+    Route::get('/order-files/{orderFile}', [StoredFileController::class, 'orderFile'])
+        ->name('order-files.show');
+    Route::get('/payment-proofs/{payment}', [StoredFileController::class, 'paymentProof'])
+        ->name('payment-proofs.show');
+});
 
 // Customer Public Routes
 Route::prefix('customer')->name('customer.')->group(function () {

@@ -190,7 +190,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">File Desain</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         @foreach($order->files->where('file_type', 'design') as $file)
-                            <a href="{{ Storage::url($file->file_path) }}" target="_blank"
+                            <a href="{{ route('files.order-files.show', $file) }}" target="_blank" rel="noopener noreferrer"
                                class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                                 <i class="fas fa-file text-blue-600 text-2xl mr-3"></i>
                                 <div class="flex-1 min-w-0">

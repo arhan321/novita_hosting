@@ -126,7 +126,7 @@
                             </h3>
                             <div class="grid grid-cols-2 gap-3">
                                 @foreach($order->files->where('file_type', 'design') as $file)
-                                    <a href="{{ Storage::url($file->file_path) }}" target="_blank"
+                                    <a href="{{ route('files.order-files.show', $file) }}" target="_blank" rel="noopener noreferrer"
                                        class="flex items-center p-3 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition">
                                         <i class="fas fa-file-download text-blue-600 text-xl mr-3"></i>
                                         <div class="flex-1 min-w-0">

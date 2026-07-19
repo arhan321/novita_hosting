@@ -104,11 +104,11 @@
                                 $extension = pathinfo($payment->payment_proof, PATHINFO_EXTENSION);
                             @endphp
                             @if(in_array(strtolower($extension), ['jpg', 'jpeg', 'png']))
-                                <a href="{{ Storage::url($payment->payment_proof) }}" target="_blank" class="inline-block">
-                                    <img src="{{ Storage::url($payment->payment_proof) }}" alt="Bukti Pembayaran" class="max-w-md rounded-lg border">
+                                <a href="{{ route('files.payment-proofs.show', $payment) }}" target="_blank" rel="noopener noreferrer" class="inline-block">
+                                    <img src="{{ route('files.payment-proofs.show', $payment) }}" alt="Bukti Pembayaran" class="max-w-md rounded-lg border">
                                 </a>
                             @else
-                                <a href="{{ Storage::url($payment->payment_proof) }}" target="_blank"
+                                <a href="{{ route('files.payment-proofs.show', $payment) }}" target="_blank" rel="noopener noreferrer"
                                    class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                                     <i class="fas fa-file-pdf mr-2"></i>
                                     Lihat Bukti Pembayaran

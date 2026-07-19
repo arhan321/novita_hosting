@@ -30,7 +30,7 @@
             <!-- Product Image -->
             <div class="bg-gray-100 flex items-center justify-center p-8">
                 @if($product->image_path)
-                    <img src="{{ Storage::url($product->image_path) }}" alt="{{ $product->name }}"
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}"
                         class="max-w-full max-h-96 object-contain rounded">
                 @else
                     <div class="text-center text-gray-400">

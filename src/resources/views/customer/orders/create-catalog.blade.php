@@ -20,7 +20,7 @@
         <div class="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
             <div class="flex items-center">
                 @if($product->image_path)
-                    <img src="{{ Storage::url($product->image_path) }}" alt="{{ $product->name }}" class="w-20 h-20 object-cover rounded-lg mr-4">
+                    <img src="{{ $product->image_url }}" alt="{{ $product->name }}" class="w-20 h-20 object-cover rounded-lg mr-4">
                 @endif
                 <div>
                     <h3 class="font-semibold text-navy-900">{{ $product->name }}</h3>
